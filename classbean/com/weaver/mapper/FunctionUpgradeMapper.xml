@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weaver.mapper.FunctionUpgradeMapper">
+	<select id="checkMenuControlList" resultType="int" databaseId="mysql">
+		select 1 from information_schema.tables where table_name='MENUCONTROLLIST' and table_schema = database()
+	</select>
+	<select id="checkMenuControlList" resultType="int" databaseId="oracle">
+		select 1 from user_tables where table_name='MENUCONTROLLIST'
+	</select>
+	<select id="checkMenuControlList" resultType="int">
+		SELECT 1 FROM sysobjects WHERE name='menucontrollist'
+	</select>
+</mapper>

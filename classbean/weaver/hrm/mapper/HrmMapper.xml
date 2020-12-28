@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.hrm.mapper.HrmMapper">
+	<select id="checkTableExists" resultType="int" databaseId="mysql">
+		select COUNT(1) from information_schema.tables where table_name in (${tableNames}) and table_schema = database()
+	</select>
+	<select id="checkTableExists" resultType="int" databaseId="oracle">
+		select COUNT(1) from user_tables where table_name in (${tableNames})
+	</select>
+	<select id="checkTableExists" resultType="int">
+		SELECT COUNT(1) FROM sysobjects WHERE id in (${tableNames}) and OBJECTPROPERTY(id, N'IsUserTable') = 1
+	</select>
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.hrm.mapper.HrmOnlineMapper">
+
+	<select id="selectLateIp" resultType="string" databaseId="mysql">
+		select ip from clusterMachine where TIMESTAMPDIFF(MINUTE, lasttime, #{_parameter}) >= 5;
+
+	</select>
+	<select id="selectLateIp" resultType="string" databaseId="oracle">
+		select ip from clusterMachine where (to_date(#{_parameter},'yyyy-mm-dd hh24:mi:ss') - to_date(lasttime,'yyyy-mm-dd hh24:mi:ss'))*24*60 >= 5
+	</select>
+	<select id="selectLateIp" resultType="string">
+		select ip from clusterMachine where (datediff(n,lasttime,#{_parameter}) >= 5)
+	</select>
+</mapper>
