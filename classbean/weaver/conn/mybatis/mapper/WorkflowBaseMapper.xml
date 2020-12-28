@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.conn.mybatis.mapper.WorkflowBaseMapper">
+
+	<!-- databaseId与resultType使用说明 -->
+	<!--可以通过在标签属性中使用databaseId标识数据库，也可以在语句中通过_databaseId区分 -->
+	<!-- resultType需要写明javabean的全路径。如果想简写，需要在MyBatis.xml中配置typeAliases -->
+	<!-- 与resultType中属性值的映射是忽略大小写与下划线的。 -->
+	<select id="selectHrmAlbumSubcompanyVO" resultType="weaver.conn.mybatis.bean.HrmAlbumSubcompanyVO" databaseId="mysql">
+			select
+
+		<if test="_databaseId=='mysql'">
+			1,
+		</if>
+			a.*,b.*,(convert(b.albumsize/(1000+0.0) , decimal(18,2))) as totalsize,
+			(convert((b.albumSizeUsed/(1000+0.0)),decimal(18,2))) as usesize,
+			(convert((b.albumSize-b.albumSizeUsed)/(1000+0.0),decimal(18,2))) as remainsize,
+			(case b.albumSize when 0 then 0 else (convert((b.albumSizeUsed/(b.albumSize+0.0)*100),decimal(18,2))) end ) AS rate
+		from HrmSubcompany a LEFT JOIN AlbumSubcompany b ON a.id=b.subcompanyId
+		order by a.supsubcomid,a.id
+	</select>
+	<select id="selectHrmAlbumSubcompanyVO" resultType="weaver.conn.mybatis.bean.HrmAlbumSubcompanyVO" databaseId="oracle">
+		select  a.*,b.*,
+		round(b.albumsize/(1000+0.0),2) as totalsize,
+		round(b.albumSizeUsed/(1000+0.0),2) as usesize,
+		round((b.albumSize-b.albumSizeUsed)/(1000+0.0),2) as remainsize,
+		(case b.albumSize when 0 then 0 else round((b.albumSizeUsed/(b.albumSize+0.0)*100),2) end ) AS rate
+		from HrmSubcompany a LEFT JOIN AlbumSubcompany b ON a.id=b.subcompanyId
+		order by a.supsubcomid,a.id
+	</select>
+	<select id="selectHrmAlbumSubcompanyVO" resultType="weaver.conn.mybatis.bean.HrmAlbumSubcompanyVO" databaseId="sqlserver">
+		select a.*,b.*,(convert(decimal(18,2),b.albumsize/(1000+0.0))) as totalsize,
+		(convert(decimal(18,2),(b.albumSizeUsed/(1000+0.0)))) as usesize,
+		(convert(decimal(18,2),(b.albumSize-b.albumSizeUsed)/(1000+0.0))) as remainsize,
+		(case b.albumSize when 0 then 0 else (convert(decimal(18,2),(b.albumSizeUsed/(b.albumSize+0.0)*100))) end ) AS rate
+		from HrmSubcompany a LEFT JOIN AlbumSubcompany b ON a.id=b.subcompanyId
+		order by a.supsubcomid,a.id
+	</select>
+
+	<!-- resultMap使用说明 -->
+	<!-- resultMap与resultType不能同时使用 -->
+	<!-- resultMap的优势在于，一次配置，随处调用 -->
+	<!-- 如果要在其它Mapper中调用，调用处需要写resultMap的全路径 -->
+	<!-- resultMap中也可以配置collection或更为复杂的bean的映射,有需要请查看MyBatis官方文档，这里不再展开 -->
+	<resultMap id="blogResult" type="weaver.conn.mybatis.bean.Blog">
+		<id property="id" column="id" />
+		<result property="title" column="blog_title"/>
+		<!-- 关联属性中实体类的写法 -->
+		<association property="author" javaType="weaver.conn.mybatis.bean.Author">
+			<id property="id" column="author_id"/>
+			<result property="username" column="author_username"/>
+			<result property="password" column="author_password"/>
+			<result property="email" column="author_email"/>
+			<result property="bio" column="author_bio"/>
+		</association>
+	</resultMap>
+
+	<!-- #{}与${} -->
+	<!-- mybatis会将#{}转为预处理语句，下面的where条件转换后形如 where id = ? -->
+	<!-- 而${}则会直接拼进sql语句中，所以有sql注入风险，一般用于 order by ${columnName} ${columnAsc}以及 select * from ${tableName} 这样的地方-->
+	<select id="selectBlog" resultMap="blogResult">
+		select * from blog where id = #{id} order by ${orderColumn}
+	</select>
+
+	<!-- 传入单个参数时，不想使用Map或javabean，可以使用下面的写法 -->
+	<select id="selectBlog2" resultMap="blogResult">
+		select * from blog order by ${_parameter}
+	</select>
+	<!-- 传入数组时，可以使用下面的写法,按数组顺序确定参数位置 -->
+	<select id="selectBlog3" resultMap="blogResult">
+		select * from blog where id = #{_parameter[0]} order by ${_parameter[1]}
+	</select>
+
+	<!-- insert -->
+	<!-- 多传参时，请传入map或javabean。Mybatis会根据Map的key或javaBean的prop来确定参数的key -->
+	<insert id="insert">
+		insert into workflow_base(id, workflow_name) values (#{id}, #{workflowName});
+	</insert>
+	<!-- 自增主键的insert -->
+	<!-- 如此标识之后，插入完毕后会将自增主键中的值配置到传入参数的id属性中-->
+	<insert id="insertAuthor" useGeneratedKeys="true" keyProperty="id">
+		insert into Author (username,password,email,bio)
+		values (#{username},#{password},#{email},#{bio})
+	</insert>
+	<!-- 调用sequence的insert -->
+	<!-- 调用完毕后，也会获得自增的主键 -->
+	<insert id="insertAuthor" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select AuthorSeq.nextval from dual
+		</selectKey>
+		insert into Author
+		(id, username, password, email,bio, favourite_section)
+		values
+		(#{id}, #{username}, #{password}, #{email}, #{bio}, #{favouriteSection,jdbcType=VARCHAR})
+	</insert>
+	<!-- foreach批量插入 -->
+	<insert id="insertAuthor" databaseId="mysql" useGeneratedKeys="true" keyProperty="id">
+		insert into Author (username, password, email, bio) values
+		<foreach item="item" collection="list" separator=",">
+			(#{item.username}, #{item.password}, #{item.email}, #{item.bio})
+		</foreach>
+	</insert>
+
+	<!-- update与delete -->
+	<update id="updateAuthor">
+		update author set name = #{name} where id = #{id}
+	</update>
+	<delete id="deleteAuthor">
+		delete from author where id = #{id}
+	</delete>
+
+	<!-- sql块-->
+	<!-- sql块中也可以接受传参，不过这里不再展开了 -->
+	<sql id="subQuery">
+		select blog.id,blog.name,author.name authorName, author.sex from blog, author
+		where blog.author = author.id
+	</sql>
+	<select id="selectBlogNumByAuthor">
+		select authorName, count(1) num
+		from (
+			<include refid="subQuery"></include>
+		) a group by authorName
+	</select>
+	<select id="selectBlogNumBySex">
+		select sex, count(1) num
+		from (
+		<include refid="subQuery"></include>
+		) a group by sex
+	</select>
+</mapper>

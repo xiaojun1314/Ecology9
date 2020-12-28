@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.general.mapper.InitMapper">
+	<select id="checkTableExists" resultType="int" databaseId="mysql">
+		select COUNT(1) from information_schema.tables where table_name=#{tableName} and table_schema = database()
+	</select>
+	<select id="checkTableExists" resultType="int" databaseId="oracle">
+		select COUNT(1) from user_tables where table_name=#{tableName}
+	</select>
+	<select id="checkTableExists" resultType="int">
+		SELECT COUNT(1) FROM sysobjects WHERE name=#{tableName}
+	</select>
+	<select id="checkColExists" resultType="int" databaseId="mysql">
+		select COUNT(1) from information_schema.columns where table_name=#{tableName} and column_name = #{colName} and table_schema = database()
+	</select>
+	<select id="checkColExists" resultType="int" databaseId="oracle">
+		SELECT COUNT(1) FROM USER_TAB_COLUMNS WHERE TABLE_NAME = #{tableName} AND COLUMN_NAME = #{colName}
+	</select>
+	<select id="checkColExists" resultType="int">
+		select count(1) from syscolumns where id=object_id(#{tableName}) and name=#{colName}
+	</select>
+
+</mapper>

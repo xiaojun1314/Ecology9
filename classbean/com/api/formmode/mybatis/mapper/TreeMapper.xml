@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.TreeMapper">
+	<select id="getAllData" resultType="com.api.formmode.mybatis.bean.TreeNodeBean">
+		select ${name} as name,${primaryKey} as primaryKey,${parentKey}  as parentKey
+		  from ${tableName}
+		  <if test="sqlWhere!=null">
+		 where ${sqlWhere}
+		  </if>
+		  <if test="orderBy!=null">
+		  ${orderBy}
+		  </if>
+	</select>
+	<select id="getRootDatas" resultType="com.api.formmode.mybatis.bean.TreeNodeBean">
+		select ${name} as name,${primaryKey} as primaryKey,${parentKey}  as parentKey
+		  from ${tableName}
+		  left join (select ${primaryKey} as primaryKey from  ${tableName}  where ${sqlWhere}) p1 on ${parentKey} = p1.primaryKey
+		 where p1.primaryKey is null
+		   and ${sqlWhere}
+	</select>
+	<select id="getChildDatas" resultType="com.api.formmode.mybatis.bean.TreeNodeBean">
+		select ${name} as name, ${primaryKey} as primaryKey, ${parentKey} as parentKey
+		  from ${tableName}
+		 where ${parentKey} = #{parentId}
+		   and ${sqlWhere}
+	</select>
+	<select id="getChildCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(1) as count
+		  from ${tableName}
+		 where ${parentKey} = #{parentId}
+		   and ${sqlWhere}
+	</select>
+	<select id="getQuickSearchKeys" resultType="com.api.formmode.mybatis.bean.TreeNodeBean">
+		select ${name} as name, ${primaryKey} as primaryKey, ${parentKey} as parentKey
+		  from ${tableName}
+		 where ${name} like #{quickSearchValue}
+		   and ${sqlWhere}
+	</select>
+	<select id="getTreeNode" resultType="com.api.formmode.mybatis.bean.TreeNodeBean">
+		select ${nameField} as name, ${primaryKey} as primaryKey, ${parentKey} as parentKey
+		  from ${tableName}
+		 where ${primaryKey} = #{primaryKeyValue}
+		   and ${sqlWhere}
+	</select>
+</mapper>

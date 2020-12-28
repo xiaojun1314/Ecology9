@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.ModeMapper">
+	<resultMap id="selectResultMap" type="com.api.formmode.mybatis.bean.SelectItemBean">
+		<id property="key" column="selectValue" />
+		<result property="title" column="selectName" />
+		<result property="value" column="selectValue" />
+		<result property="parentValue" column="parentValue" />
+	</resultMap>
+	<select id="getModeByFormId" resultType="com.api.formmode.mybatis.bean.ModeInfoBean">
+		select id, modename 
+		  from modeinfo
+		 where formid = #{formId}
+	</select>
+	<select id="getLayouts" resultType="com.api.formmode.mybatis.bean.ModeLayoutBean">
+		select id, modeId, formId, type, layoutName,
+		       sysPath, colsPerRow, cssFile, isDefault, version,
+		       operUser, operTime, dataJSON, pluginJSON,  scripts
+		  from modeHtmlLayout
+		 where modeId = #{modeId}
+	</select>
+	<select id="getModeFieldSelectItems" resultType="com.api.formmode.mybatis.bean.ModeFieldSelectItemBean">
+		select a.id as fieldId,a.fieldlabel, a.viewtype, a.detailTable,a.fieldName,
+		       c.orderId detailTableOrder, a.fieldHtmlType, a.fieldDbType, a.type as fieldType,
+		       b.layoutId
+		  from workflow_billfield a 
+     left join workflow_billdetailTable c 
+            on a.detailTable = c.tableName and a.billid = c.billid,
+		       modeFormField b
+		 where a.id = b.fieldId
+		 	<if test="formId!=null and formId!=''">
+		   and a.billid = #{formId}
+		 	</if>
+		 	<if test="modeId!=null and modeId!=''">
+		   and b.modeId = #{modeId}
+		 	</if>
+		 	<if test="isEdit!=null and isEdit != ''">
+		   and b.isedit = #{isEdit}
+		 	</if>
+			<if test="layoutId != null and layoutId != ''">
+				and b.layoutid = #{layoutId}
+			</if>
+		    <if test="fieldHtmlTypes !=null">
+		  		<foreach collection="fieldHtmlTypes" item="type" index="index" open="and (" separator="or" close=")">
+		  		a.fieldHtmlType = #{type}
+		  		</foreach>
+		   </if>
+		   order by a.viewtype,a.dsporder
+	</select>
+	<select id="getSelectItems" resultMap="selectResultMap">
+		select selectValue, selectName, fieldid as parentValue
+		  from workflow_selectItem
+		 where fieldId in
+		 <foreach collection="fieldIds" item="fieldId" index="index" open="(" separator="," close=")">
+		  	#{fieldId}
+		 </foreach>
+	</select>
+	<select id="getHrmResourceFields"  resultType="com.api.formmode.mybatis.bean.FieldBean">
+		select a.id fieldId, a.fieldLabel 
+		  from workflow_billfield a , 
+		       modeinfo b 
+		 where a.billid = b.formid 
+		   and a.fieldhtmltype = '3' 
+		   and a.type in ('1','17') 
+		   and b.id = #{modeId}
+	</select>
+	<select id="getLayoutSelects" resultType="com.api.formmode.mybatis.bean.ModeLayoutBean" >
+		select id, layoutname, type
+		from MODEHTMLLAYOUT
+		where modeid = #{modeid}
+	</select>
+</mapper>

@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.SplitPageMapper">
+	<select id="getAllDatas" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select r.* 
+		<if test="outFields!=null and outFields!=''">
+			   ,${outFields}
+		</if>
+		from ( select 
+		<if test="isDistinct"> distinct </if>
+					  ${fields}
+			     from ${sqlFrom}
+			     where 1=1
+		<if test="sqlWhere !=null and sqlWhere != ''">
+			and ${sqlWhere}
+		</if>
+		<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+			and ${objectSqlWhere}
+		</if>
+		<if test="conditionValues!=null">
+			<foreach collection="conditionValues" index="index1" item="lsSql"
+				open="and " separator="and" close="">
+				<foreach collection="lsSql" index="index2" item="bean" open="( "
+					separator="or" close=")">
+					${bean.name}
+					<choose>
+						<when test="bean.operation == 'between'">
+							between #{bean.value} and #{bean.value1}
+						</when>
+						<when test="bean.operation == 'exists' or bean.operation == 'in'">
+							${bean.operation} ${bean.value}
+						</when>
+						<otherwise>
+							${bean.operation} #{bean.value}
+						</otherwise>
+					</choose>
+				</foreach>
+			</foreach>
+		</if>
+		<if test="groupValues!=null">
+			<foreach collection="groupValues" index="index" item="item"
+				open="and " separator="and" close="">
+				<choose>
+					<when test="item.value == 'empty'">
+						${item.name} is null
+					</when>
+					<otherwise>
+						${item.name} = #{item.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
+		<if test="groupBy != null and groupBy != ''">
+			group by ${groupBy}
+		</if>
+		order by
+		<if test="orderBy != null and orderBy != ''">
+			${orderBy},
+		</if>
+		<if test="orderByList!=null">
+			<foreach collection="orderByList" index="index" item="item"
+				open="" separator="," close=",">
+				${item.name} ${item.type}
+			</foreach>
+		</if>
+		${primaryKey} ${primaryKeyOrderType} ) r  
+		<if test="outSqlFrom != null and outSqlFrom != '' and outSqlWhere != null and outSqlWhere != ''">
+			,${outSqlFrom}
+			where ${outSqlWhere}
+		</if>
+	</select>
+	<select id="getCurrentPage" resultType="com.api.formmode.mybatis.bean.SplitPageResult"
+		databaseId="oracle">
+		select r.*
+		<if test="outFields!=null and outFields!=''">
+			,${outFields}
+		</if>
+		from ( select my_table.*, rownum as my_rownum
+		from ( select tableA.*,rownum as oracle_rownum
+		from ( select
+		<if test="isDistinct"> distinct </if>
+		${fields}
+		from ${sqlFrom}
+		where 1=1
+		<if test="sqlWhere !=null and sqlWhere != ''">
+			and ${sqlWhere}
+		</if>
+		<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+			and ${objectSqlWhere}
+		</if>
+		<if test="conditionValues!=null">
+			<foreach collection="conditionValues" index="index1" item="lsSql"
+				open="and " separator="and" close="">
+				<foreach collection="lsSql" index="index2" item="bean" open="( "
+					separator="or" close=")">
+					${bean.name}
+					<choose>
+						<when test="bean.operation == 'between'">
+							between #{bean.value} and #{bean.value1}
+						</when>
+						<when test="bean.operation == 'exists' or bean.operation == 'in'">
+							${bean.operation} ${bean.value}
+						</when>
+						<otherwise>
+							${bean.operation} #{bean.value}
+						</otherwise>
+					</choose>
+				</foreach>
+			</foreach>
+		</if>
+		<if test="groupValues!=null">
+			<foreach collection="groupValues" index="index" item="item"
+				open="and " separator="and" close="">
+				<choose>
+					<when test="item.value == 'empty'">
+						${item.name} is null
+					</when>
+					<otherwise>
+						${item.name} = #{item.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
+		<if test="groupBy != null and groupBy != ''">
+			group by ${groupBy}
+		</if>
+		order by
+		<if test="orderBy != null and orderBy != ''">
+			${orderBy},
+		</if>
+		<if test="orderByList!=null">
+			<foreach collection="orderByList" index="index" item="item"
+				open="" separator="," close=",">
+				${item.name} ${item.type}
+			</foreach>
+		</if>
+		${primaryKey} ${primaryKeyOrderType}
+		) tableA
+		) my_table
+		where oracle_rownum between #{min} and #{max}
+		) r
+		<if
+			test="outSqlFrom != null and outSqlFrom != '' and outSqlWhere != null and outSqlWhere != ''">
+			,${outSqlFrom}
+			where ${outSqlWhere}
+		</if>
+		order by my_rownum
+	</select>
+	<select id="getCurrentPage" resultType="com.api.formmode.mybatis.bean.SplitPageResult"
+		databaseId="sqlserver">
+		select outtemp1409477546046.* from (
+			select row_number()over(order by tempcolumn1409477546046) temprownumber1409477546046,* from (
+				select 
+		<if test="isDistinct">
+			distinct
+		</if>
+		top ${max} tempcolumn1409477546046=0, ${fields}
+		from ${sqlFrom}
+		where 1=1
+		<if test="sqlWhere !=null and sqlWhere != ''">
+			and ${sqlWhere}
+		</if>
+		<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+			and ${objectSqlWhere}
+		</if>
+		<if test="conditionValues!=null">
+		<foreach collection="conditionValues" index="index1" item="lsSql"
+			open="and " separator="and" close="">
+			<foreach collection="lsSql" index="index2" item="bean" open="( "
+				separator="or" close=")">
+				${bean.name}
+				<choose>
+					<when test="bean.operation == 'between'">
+						between #{bean.value} and #{bean.value1}
+					</when>
+					<when test="bean.operation == 'exists' or bean.operation == 'in'">
+						${bean.operation} ${bean.value}
+					</when>
+					<otherwise>
+						${bean.operation} #{bean.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</foreach>
+		</if>
+		<if test="groupValues!=null">
+			<foreach collection="groupValues" index="index" item="item"
+				open="and " separator="and" close="">
+				<choose>
+					<when test="item.value == 'empty'">
+						${item.name} is null
+					</when>
+					<otherwise>
+						${item.name} = #{item.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
+		<if test="groupBy != null and groupBy != ''">
+			group by ${groupBy}
+		</if>
+		order by
+		<if test="orderBy != null and orderBy != ''">
+			${orderBy},
+		</if>
+		<if test="orderByList!=null">
+			<foreach collection="orderByList" index="index" item="item"
+				open="" separator="," close=",">
+				${item.name} ${item.type}
+			</foreach>
+		</if>
+				${primaryKey} ${primaryKeyOrderType}
+			) innertemp1409477546046 		
+		) outtemp1409477546046  
+	where temprownumber1409477546046>=${min} order by temprownumber1409477546046
+		
+	</select>
+	<select id="getRecordCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(
+		<if test="isDistinct"> distinct </if>
+		<choose>
+			<when test="isGroupCount">
+				*) count, ${countGroupBy} name
+				from (select ${fields}
+				from ${sqlFrom}
+				where 1=1
+				<if test="sqlWhere !=null and sqlWhere != ''">
+					and ${sqlWhere}
+				</if>
+				<if test="conditionValues!=null">
+					<foreach collection="conditionValues" index="index" item="lsSql"
+						open="and " separator="and" close="">
+						<foreach collection="lsSql" index="index2" item="bean"
+							open="( " separator="or" close=")">
+							${bean.name}
+							<choose>
+								<when test="bean.operation == 'between'">
+									between #{bean.value} and #{bean.value1}
+								</when>
+								<when test="bean.operation == 'exists' or bean.operation == 'in'">
+									${bean.operation} ${bean.value}
+								</when>
+								<otherwise>
+									${bean.operation} #{bean.value}
+								</otherwise>
+							</choose>
+						</foreach>
+					</foreach>
+				</if>
+				<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+					and ${objectSqlWhere}
+				</if>
+
+				) tblTmp group by ${countGroupBy}
+			</when>
+			<otherwise>
+				${primaryKey}) count
+				from ${sqlFrom}
+				where 1=1
+				<if test="sqlWhere !=null and sqlWhere != ''">
+					and ${sqlWhere}
+				</if>
+				<if test="conditionValues!=null">
+					<foreach collection="conditionValues" index="index" item="lsSql"
+						open="and " separator="and" close="">
+						<foreach collection="lsSql" index="index2" item="bean"
+							open="( " separator="or" close=")">
+							${bean.name}
+							<choose>
+								<when test="bean.operation == 'between'">
+									between #{bean.value} and #{bean.value1}
+								</when>
+								<when test="bean.operation == 'exists' or bean.operation == 'in'">
+									${bean.operation} ${bean.value}
+								</when>
+								<otherwise>
+									${bean.operation} #{bean.value}
+								</otherwise>
+							</choose>
+						</foreach>
+					</foreach>
+				</if>
+				<if test="groupValues!=null">
+					<foreach collection="groupValues" index="index" item="item"
+						open="and " separator="and" close="">
+						<choose>
+							<when test="item.value == 'empty'">
+								${item.name} is null
+							</when>
+							<otherwise>
+								${item.name} = #{item.value}
+							</otherwise>
+						</choose>
+					</foreach>
+				</if>
+				<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+					and ${objectSqlWhere}
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getSumAndCount" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select count(
+		<if test="isDistinct">distinct</if>
+		${primaryKey}) count
+		<if test="sumFields!=null">
+			<foreach collection="sumFields" index="index" item="item"
+				open=", " separator="," close="">
+				sum(COALESCE(${item.sqlName},0)) ${item.dataIndex}
+			</foreach>
+		</if>
+		from ${sqlFrom}
+		where 1=1
+		<if test="sqlWhere !=null and sqlWhere != ''">
+			and ${sqlWhere}
+		</if>
+		<if test="conditionValues!=null">
+			<foreach collection="conditionValues" index="index" item="lsSql"
+				open="and " separator="and" close="">
+				<foreach collection="lsSql" index="index2" item="bean" open="( "
+					separator="or" close=")">
+					${bean.name}
+					<choose>
+						<when test="bean.operation == 'between'">
+							between #{bean.value} and #{bean.value1}
+						</when>
+						<when test="bean.operation == 'exists' or bean.operation == 'in'">
+							${bean.operation} ${bean.value}
+						</when>
+						<otherwise>
+							${bean.operation} #{bean.value}
+						</otherwise>
+					</choose>
+				</foreach>
+			</foreach>
+		</if>
+		<if test="groupValues!=null">
+			<foreach collection="groupValues" index="index" item="item"
+				open="and " separator="and" close="">
+				<choose>
+					<when test="item.value == 'empty'">
+						${item.name} is null
+					</when>
+					<otherwise>
+						${item.name} = #{item.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
+		<if test="objectSqlWhere !=null and objectSqlWhere != ''">
+			and ${objectSqlWhere}
+		</if>
+	</select>
+</mapper>

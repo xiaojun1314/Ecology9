@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.ModeTreeFieldMapper">
+	<select  id="getAllChild"  resultType="com.api.formmode.mybatis.bean.PrimaryKeyBean" databaseId="oracle">
+		select id primaryKey 
+		  from modeTreeField 
+		 where ','|| allSuperFieldId||','  like #{modeType} and nvl(isdelete,0)!=1
+	</select>
+	
+	<select id="getAllChild"  resultType="com.api.formmode.mybatis.bean.PrimaryKeyBean" databaseId="sqlserver">
+		select id primaryKey 
+		  from modeTreeField 
+		 where ','+allSuperFieldId+',' like #{modeType} and isnull(isdelete,0)!=1
+	</select>
+	
+	<select id="getAllChild"  resultType="com.api.formmode.mybatis.bean.PrimaryKeyBean" databaseId="mysql">
+		select id primaryKey 
+		  from modeTreeField 
+		 where concat(',',allSuperFieldId,',') like #{modeType} and ifnull(isdelete,0)!=1
+	</select>
+	
+	<sql id="allChildApp" databaseId="oracle">
+	  select t.id
+		 from modeTreeField t
+		where ','|| t.allSuperFieldId||',' like #{appIdSql} or t.id = #{appId}
+	</sql>
+	<sql id="allChildApp" databaseId="sqlserver">
+		select t.id
+		from modeTreeField t
+		where ','+t.allSuperFieldId+',' like #{appIdSql} or t.id = #{appId}
+	</sql>
+	<sql id="allChildApp" databaseId="mysql">
+		select t.id
+		from modeTreeField
+		where concat(',',t.allSuperFieldId,',') like #{appIdSql} or t.id = #{appId}
+	</sql>
+	<select id="getModeCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count
+		  from modeinfo
+		 where 1=1
+		and MODETYPE in ( <include refid="allChildApp"/> )
+		  and (ISDELETE is null or ISDELETE = '0')
+	</select>
+
+	<select id="getFormCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count
+		from workflow_bill a
+		where exists (select 1 from modeinfo b where a.id = b.formid and b.modetype in ( <include refid="allChildApp"/> ))
+		   or EXISTS (select 1 from appforminfo c where a.id = c.formid and c.appid in ( <include refid="allChildApp"/> ))
+		   or exists (select 1 from  ModeFormExtend d where d.formid = a.id and d.appid in ( <include refid="allChildApp"/> ))
+	</select>
+	<select id="getSearchCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count
+		from mode_customsearch a
+		where exists (select 1 from modeinfo b where a.modeid = b.id and b.modetype in ( <include refid="allChildApp"/> ))
+		or a.appid in (<include refid="allChildApp"/>)
+	</select>
+	<select id="getBrowserCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count
+		from mode_custombrowser a
+		where exists (select 1 from modeinfo b where a.modeid = b.id and b.modetype in ( <include refid="allChildApp"/> ))
+		or a.appid in (<include refid="allChildApp"/>)
+	</select>
+	<select id="getTreeCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count
+		from mode_customtree a
+		where a.appid in (<include refid="allChildApp"/>)
+	</select>
+</mapper>

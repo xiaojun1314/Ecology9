@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.CustomSearchMapper">
+	<select id="getButtons" resultType="com.api.formmode.mybatis.bean.CustomSearchBatchSetBean">
+		select COALESCE(s.id, 0) as batchSetId,
+			   COALESCE(s.listBatchName, e.expendName) as listBatchName,
+			   COALESCE(s.isUse, e.defaultenable) as isUse,
+			   s.isShortCutButton,
+			   COALESCE(s.expandId, e.id) as expandId,
+			   e.isSystemFlag,
+			   e.showType,
+			   e.openType,
+			   e.hrefType,
+			   e.hrefId,
+			   e.hrefTarget
+		  from mode_pageExpand e
+     left join mode_batchSet s
+		    on e.id = s.expandId
+		       and s.customSearchId = #{customId} 
+		 where
+			<choose>
+				<when test="modeId==0">
+					e.MODEID is null
+				</when>
+				<otherwise>
+					e.modeId = #{modeId}
+				</otherwise>
+			</choose>
+		   and COALESCE(s.isUse, e.defaultenable) = '1'
+		   and e.isbatch in ('1','2')
+		 order by COALESCE(s.showOrder,e.showOrder)
+	</select>
+	<select id="getColumns" resultType="com.api.formmode.mybatis.bean.FieldBean">
+		 select a.id as dspId,a.customId,a.FieldId,a.isQuery, a.isShow,a.showOrder,
+	       		a.queryOrder,a.isTitle,a.colWidth,a.isOrder,a.orderType,
+		   		a.orderNum,a.isStat,a.isKey,a.isOrderField,a.priOrder,
+		   		a.hrefLink,a.showMethod,a.isGroup,a.searchParaName,a.searchParaName1,
+				a.isAdvancedQuery,a.advancedQueryOrder,a.conditionTransition,a.isMapLocation,a.editable as isEditable,
+		   		COALESCE(a.showNameLabel,b.fieldLabel) as showNameLabel,
+		   		b.billId,b.fieldDbType,b.fieldHtmlType,b.type,b.fieldName,
+		   		b.viewType
+      	   from mode_CustomDspField a 
+ 	  left join workflow_billfield b on a.fieldid = b.id
+          where a.customid = #{customId}
+          <if test="isKey!=null and isKey !=''">
+			  and isKey = #{isKey}
+		  </if>
+	</select>
+	<delete id="deleteData" >
+		delete from ${tableName}
+		 where ${primaryKey} in 
+		 <foreach collection="primaryKeyValues" index="index" item="value" open="(" separator="," close=")">
+		 	   #{value}
+		</foreach>
+	</delete>
+	<select id="getCustomButtons" resultType="com.api.formmode.mybatis.bean.CustomSearchButtonBean">
+		select * from mode_customsearchButton where objid = #{customId} and isShow = '1' order by SHOWORDER
+	</select>
+	<select id="getBatchEditDetail" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select a.*, b.fieldname from mode_batchmodifydetail a, workflow_billfield b  where a.FEILDID = b.id and  a.mainid = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.interfaces.mapper.UpgradeClearMapper">
+	<update id="replaceActionName">
+		update workflowactionset set actionname = replace(actionname,'action.','')
+		<if test="_databaseId=='oracle' || _databaseId=='mysql'">
+		where instr(actionname,'action.')>0
+		</if>
+		<if test="_databaseId=='sqlserver'">
+		where CHARINDEX('action.',actionname)>0
+		</if>
+	</update>
+	<update id="replaceInterfaceId">
+		update workflowactionset set interfaceid = replace(interfaceid,'action.','')
+		<if test="_databaseId=='oracle' || _databaseId=='mysql'">
+		where instr(interfaceid,'action.')>0
+		</if>
+		<if test="_databaseId=='sqlserver'">
+		where CHARINDEX('action.',interfaceid)>0
+		</if>
+	</update>
+	<update id="checkFormActionExists">
+		<![CDATA[
+		select a.id, a.formid from formactionset a, formactionsqlset b where a.id = b.actionid and a.formid < 0
+		]]>
+		<if test="_databaseId=='oracle' || _databaseId=='mysql'">
+		and instr(b.actiontable, -a.formid) = 0
+		</if>
+		<if test="_databaseId=='sqlserver'">
+		and charindex(cast(-a.formid as varchar), b.actiontable) = 0
+		</if>
+	</update>
+	<select id="countActionSet" resultType="int" databaseId="sqlserver">
+        select COUNT(id) from workflowactionset
+        where charindex('action.',actionname)=1
+        or charindex('action.',interfaceid)=1
+	</select>
+
+	<select id="countActionSet" resultType="int">
+		select COUNT(id) from workflowactionset
+		where instr(actionname,'action.') = 1
+		or instr(interfaceid,'action.')=1
+	</select>
+
+	<select id="countNotRegiste" resultType="int" databaseId="oracle">
+        select t.* from wsformactionset t
+        where not exists (
+            select 1 from wsformactionset t1 join wsregiste t2
+			on t1.wsurl = to_char(t2.id) where t.id=t1.id
+        )
+	</select>
+	<select id="countNotRegiste" resultType="int" databaseId="sqlserver">
+         select t.* from wsformactionset t
+         where not exists (
+            select 1 from wsformactionset t1 join wsregiste t2
+            on t1.wsurl = convert(varchar(1000),t2.id) where t.id=t1.id
+         )
+	</select>
+	<select id="countNotRegiste" resultType="int" databaseId="mysql">
+         select t.* from wsformactionset t
+         where not exists (
+            select 1 from wsformactionset t1 join wsregiste t2
+            on t1.wsurl = t2.id where t.id=t1.id
+         )
+	</select>
+</mapper>

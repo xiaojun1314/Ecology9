@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.SimpleTableMapper">
+    <insert id="insert">
+        insert into modefieldauthorize
+        <foreach collection="sets" index="index" item="set" open="( " separator="," close=")">
+            ${set.name}
+        </foreach>
+        values
+        <foreach collection="sets" index="index" item="set" open="( " separator="," close=")">
+            ${set.value}
+        </foreach>
+    </insert>
+    <delete id="clear">
+        delete
+          from ${tableName}
+        where
+        <choose>
+            <when test="sqlWhere == null ">
+              1=2
+            </when>
+            <otherwise>
+                <foreach collection="sqlWhere" index="index" item="lsSql"
+                         open="" separator="and" close="">
+                    <foreach collection="lsSql" index="index2" item="bean"
+                             open="( " separator="or" close=")">
+                        ${bean.name}
+                        <choose>
+                            <when test="bean.operation == 'between'">
+                                between #{bean.value} and #{bean.value1}
+                            </when>
+                            <when test="bean.operation == 'exists' or bean.operation == 'in'">
+                                ${bean.operation} ${bean.value}
+                            </when>
+                            <otherwise>
+                                ${bean.operation} #{bean.value}
+                            </otherwise>
+                        </choose>
+                    </foreach>
+                </foreach>
+            </otherwise>
+        </choose>
+    </delete>
+</mapper>

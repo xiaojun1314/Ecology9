@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.CustomPageMapper">
+	<select id="getAllPages" resultType="com.api.formmode.mybatis.bean.CustomPageBean">
+		select id, customname, customdesc, creater, createdate,
+			   createtime, appid, props propsStr, subcompanyid, guid,
+			   component
+		  from mode_custompage
+		 union all 
+		select id, customname, customdesc, creater, createdate,
+			   createtime, appid, props propsStr, subcompanyid, guid,
+			   component
+		  from cpt_custompage
+	</select>
+	<select id="getDocker" resultType="com.api.formmode.mybatis.bean.CustomPageBean">
+		select a.*, a.props  propsStr
+		  from mode_custompage a
+		 where
+		<choose>
+			<when test="guid !=null and guid != ''">
+			   a.guid = #{guid}
+			</when>
+			<when test="id != null and id != ''">
+			   a.id = #{id}
+			</when>
+			<otherwise>
+			   1=2
+			</otherwise>
+		</choose>
+		 union all 
+	    select a.*, a.props  propsStr
+		  from cpt_custompage a
+		 where
+		<choose>
+			<when test="guid !=null and guid != ''">
+			   a.guid = #{guid}
+			</when>
+			<when test="id != null and id != ''">
+			   a.id = #{id}
+			</when>
+			<otherwise>
+			   1=2
+			</otherwise>
+		</choose>
+	</select>
+	<insert id="addDocker">
+		insert into mode_custompage
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+			   ${item.name}
+		</foreach>
+		values
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+			   #{item.value}
+		</foreach>
+	</insert>
+	<update id="editDocker">
+		update mode_custompage
+		   set
+		<foreach collection="sets" index="index" item="item" open="" separator="," close="">
+			   ${item.name} = #{item.value}
+		</foreach>
+		 where
+		<choose>
+			<when test="guid !=null and guid != ''">
+			   guid = #{guid}
+			</when>
+			<when test="id != null and id != ''">
+			   id = #{id}
+			</when>
+			<otherwise>
+			   1=2
+			</otherwise>
+		</choose>
+	</update>
+</mapper>

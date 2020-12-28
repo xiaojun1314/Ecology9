@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.CardMapper">
+	<update id="editCard">
+		update ${tableName}
+		   <set>
+		   	<foreach collection="sets" index="index" item="item" open="" separator="," close="">
+		 	  ${item.name} = #{item.value}
+			</foreach>
+		   </set>
+		  where ${primaryKey} = #{primaryKeyValue}
+	</update>
+	<insert id="addCardBackId" useGeneratedKeys="true" keyProperty="id">
+		insert into ${tableName}
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+		 	   ${item.name}
+		</foreach>
+		values 
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+		 	   #{item.value}
+		</foreach>
+	</insert>
+	<insert id="addCardWithUUID" >
+		insert into ${tableName}
+		 ( uuid
+		<foreach collection="sets" index="index" item="item" open="," separator="," close=")">
+		 	   ${item.name}
+		</foreach>
+		values 
+		( #{uuid}
+		<foreach collection="sets" index="index" item="item" open="," separator="," close=")">
+		 	   #{item.value}
+		</foreach>
+	</insert>
+	<insert id="insertCard">
+		insert into ${tableName}
+		(
+		<if test="uuid != null and uuid != ''"> uuid, </if>
+		<if test="sets != null">
+		<foreach collection="sets" index="index" item="item" open="" separator="," close="">
+			${item.name}
+		</foreach>
+		</if>
+		)
+		values
+		(
+		<if test="uuid != null and uuid != ''"> #{uuid}, </if>
+		<if test="sets != null">
+			<foreach collection="sets" index="index" item="item" open="" separator="," close="">
+				#{item.value}
+			</foreach>
+		</if>
+		)
+	</insert>
+	<update id="updateCard" >
+		update ${tableName}
+		<set>
+			<if test="sets != null">
+			<foreach collection="sets" index="index" item="item" open="" separator="," close="">
+				${item.name} = #{item.value}
+			</foreach>
+			</if>
+		</set>
+		where ${primaryKey} = #{primaryKeyValue}
+	</update>
+	<delete id="deleteCard">
+		delete from ${tableName} where ${primaryKey} = #{primaryKeyValue}
+	</delete>
+	<insert id="addCard">
+		insert into ${tableName}
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+		 	   ${item.name}
+		</foreach>
+		values 
+		<foreach collection="sets" index="index" item="item" open="(" separator="," close=")">
+		 	   #{item.value}
+		</foreach>
+	</insert>
+	<select id="getCard" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select 
+		 <choose>
+		 	<when test="fields!=null">
+		 		<foreach collection="fields" index="index" item="item" open="" separator="," close="">
+		 	   		${item.name}
+				</foreach>
+		 	</when>
+		 	<otherwise>
+		 		*
+		 	</otherwise>
+		 </choose>
+		  from ${tableName}
+		 where 1=1
+		<if test="sqlWhere!=null and sqlWhere != ''">
+			and ${sqlWhere}
+		</if>
+		<if test="primaryKey!=null and primaryKey != '' and primaryKeyValue!=null and primaryKeyValue != ''">
+			and ${primaryKey} = #{primaryKeyValue}
+		</if>
+		<if test="sqlWhereList!=null">
+			<foreach collection="sqlWhereList" index="index" item="item" open="" separator=" " close="">
+		 	and ${item.name} = #{item.value}
+			</foreach>
+		</if>
+	</select>
+	<select id="getIdByUUID" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select ${primaryKey} primaryKey from ${tableName} where uuid = #{uuid}
+	</select>
+
+	<select id="getHtmlLabelIndexId" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select indexid id from htmllabelinfo where labelname = #{text} and languageid = #{languageid}
+	</select>
+	<select id="getNextHtmlLabelIndexId" resultType="com.api.formmode.mybatis.bean.SplitPageResult">
+		select min(id) id from htmllabelindex
+	</select>
+	<delete id="deleteHtmlLabelIndex">
+		delete from htmllabelindex where id = #{indexid}
+	</delete>
+	<insert id="newHtmlLabelIndex">
+		insert into htmllabelindex values(#{indexid}, #{text})
+	</insert>
+	<delete id="deleteHtmlLabelInfo">
+		delete from htmllabelinfo where indexid = #{indexid}
+	</delete>
+	<insert id="newHtmlLabelInfo" >
+		insert into htmllabelinfo values (#{indexid},#{text},#{languageid})
+	</insert>
+</mapper>

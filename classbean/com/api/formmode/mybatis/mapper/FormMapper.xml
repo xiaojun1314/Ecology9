@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.FormMapper">
+	<resultMap id="selectResultMap" type="com.api.formmode.mybatis.bean.SelectItemBean">
+		<id property="key" column="selectValue" />
+		<result property="title" column="selectName" />
+		<result property="value" column="selectValue" />
+	</resultMap>
+	<select id="getSelectItems" resultMap="selectResultMap" >
+		select selectName ,selectValue
+		from workflow_selectItem
+		where fieldId = #{fieldId}
+		order by selectValue asc
+	</select>
+
+	<select id="getDetailTables" resultType="com.api.formmode.mybatis.bean.DetailTableBean">
+		select id, billId,
+		tableName, title, orderId
+		from workflow_billdetailtable
+		where billId = #{billId}
+		order by orderId asc
+	</select>
+	<select id="getFieldSelects" resultType="com.api.formmode.mybatis.bean.FieldBean">
+		select a.id fieldId, a.fieldDbType, a.fieldName, a.fieldLabel,
+		a.detailTable
+		from workflow_billfield a
+		where a.billid = #{formId}
+		<if test=" viewType !=null and viewType != '' ">
+			and a.viewType = #{viewType}
+		</if>
+		<if test=" detailTable!=null and detailTable != '' ">
+			and a.detailTable = #{detailTable}
+		</if>
+		<if test="fieldHtmlType != null and fieldHtmlType != '' ">
+			and a.FIELDHTMLTYPE = #{fieldHtmlType}
+		</if>
+		<if test="type != null and type != '' ">
+			and a.type = #{type}
+		</if>
+	</select>
+	<delete id="deleteData">
+		delete from ${tableName} where ${field} = #{value}
+	</delete>
+	<insert id="addRow">
+		insert into ${tableName}
+		<foreach collection="sets" item="set" index="ni" open="(" separator="," close=")">
+			${set.name}
+		</foreach>
+		values 
+		<foreach collection="sets" item="set" index="vi" open="(" separator="," close=")">
+			#{set.value}
+		</foreach>
+	</insert>
+	<insert id="addData" databaseId="sqlserver">
+		insert into ${tableName}
+		<foreach collection="columns" item="col" index="ci" open="(" separator="," close=")">
+			${col}
+		</foreach>
+		values
+		<foreach collection="datas" item="row" index="ri" open="" separator="," close="">
+			<foreach collection="row" item="data" index="di" open="(" separator="," close=")">
+				#{data}
+			</foreach>
+		</foreach>
+	</insert>
+	<insert id="addData" databaseId="mysql">
+		insert into ${tableName}
+		<foreach collection="columns" item="col" index="ci" open="(" separator="," close=")">
+			${col}
+		</foreach>
+		values
+		<foreach collection="datas" item="row" index="ri" open="" separator="," close="">
+			<foreach collection="row" item="data" index="di" open="(" separator="," close=")">
+				#{data}
+			</foreach>
+		</foreach>
+	</insert>
+	<insert id="addData" databaseId="oracle">
+		insert into ${tableName}
+		<foreach collection="columns" item="col" index="ci" open="(" separator="," close=")">
+			${col}
+		</foreach>
+		<foreach collection="datas" item="row" index="ri" open="select * from (" separator="union all" close=") t">
+			<foreach collection="row" item="data" index="di" open="select" separator="," close="from dual">
+				#{data}
+			</foreach>
+		</foreach>
+	</insert>
+	<select id="getHrmResourceFields"  resultType="com.api.formmode.mybatis.bean.FieldBean">
+		select a.id fieldId, a.fieldLabel 
+		  from workflow_billfield a 
+		 where a.fieldhtmltype = '3' 
+		   and a.type in ('1','17') 
+		   and a.billid = #{formId}
+	</select>
+	<select id="getModeCount" resultType="com.api.formmode.mybatis.bean.CountBean">
+		select count(id) count from (
+			select id from modeinfo where formid = #{formid}
+			union all select id from mode_customsearch where formid = #{formid}
+			union all select id from mode_report where formid = #{formid}
+			union all select id from mode_custombrowser where formid = #{formid}) t
+	</select>
+</mapper>

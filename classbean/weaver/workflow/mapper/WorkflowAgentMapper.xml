@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weaver.workflow.mapper.WorkflowAgentMapper">
+	<select id="selectUsingAgent" resultType="string" databaseId="mysql">
+		<![CDATA[
+			select * from workflow_agentConditionSet
+			where agenttype = '1'
+			and ifnull(isSet,'0')!='1'
+			and ispendthing='1'
+			and (beginDate is not null and beginDate!='')
+			and (unix_timestamp(beginDate+' '+begintime)<=unix_timestamp('${_parameter}'))
+			and (endDate is null or endDate='' or (unix_timestamp(endDate+' '+endtime)>unix_timestamp('${_parameter}')))
+		]]>
+	</select>
+	<select id="selectUsingAgent" resultType="string" databaseId="oracle">
+		<![CDATA[
+			select * from workflow_agentConditionSet
+			where agenttype = '1'
+			and nvl(isSet,'0')!='1'
+			and ispendthing='1'
+			and (beginDate is not null )
+			and (beginDate||' '||begintime<='${_parameter}')
+			and (endDate is null or endDate='' or (endDate||' '||endtime>'${_parameter}'))
+		]]>
+	</select>
+	<select id="selectUsingAgent" resultType="string">
+		<![CDATA[
+			select * from workflow_agentConditionSet
+			where agenttype = '1'
+			and isnull(isSet,'0')!='1'
+			and ispendthing='1'
+			and (beginDate is not null and beginDate!='')
+			and (beginDate+' '+begintime<='${_parameter}')
+			and (endDate is null or endDate='' or (endDate+' '+endtime>'${_parameter}'))
+		]]>
+	</select>
+</mapper>

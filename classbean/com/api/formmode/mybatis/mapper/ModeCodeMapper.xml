@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.formmode.mybatis.mapper.ModeCodeMapper">
+	<select id="getCodeFields" resultType="com.api.formmode.mybatis.bean.FormFieldBean">
+		select id,fieldlabel 
+		from workflow_billfield 
+		where viewtype=0 and type='1' and fieldhtmltype='1' 
+		and billid=#{formId}
+	</select>
+</mapper>

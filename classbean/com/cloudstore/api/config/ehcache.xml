@@ -1,0 +1,19 @@
+<ehcache>  
+    <diskStore path="java.io.tempdir" />  
+    <defaultCache    
+     maxElementsInMemory = "10000"    
+     maxElementsOnDisk = "0"
+     eternal = "true"    
+     overflowToDisk = "true"    
+     diskPersistent = "false"    
+     diskSpoolBufferSizeMB = "50"    
+     diskExpiryThreadIntervalSeconds = "120"    
+     memoryStoreEvictionPolicy = "LFU"    
+     />   
+    <cache name="com.cloudstore" 
+        maxElementsInMemory="10000"
+        eternal="true"
+        overflowToDisk="true" 
+        diskPersistent="true" 
+        memoryStoreEvictionPolicy="LFU"  />  
+</ehcache>  

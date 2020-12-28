@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloudstore.dev.api.mapper.Dao_TableMapper">
+
+	<insert id="insertUserDefCol" useGeneratedKeys="true" keyProperty="id">
+		insert into cloudstore_defcol (dataIndex,sysid, orders, display, pageUid,userid) values
+		<foreach item="item" collection="list" separator=",">
+			(#{item.dataIndex},'', #{item.orders}, #{item.display}, #{item.pageUid}, #{item.userId})
+		</foreach>
+	</insert>
+
+</mapper>
