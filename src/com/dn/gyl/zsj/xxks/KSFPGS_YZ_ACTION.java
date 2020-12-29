@@ -1,8 +1,8 @@
-package com.dn.gyl.zsj.chxz;
+package com.dn.gyl.zsj.xxks;
 
 import com.dn.common.CommonUtil;
+import com.dn.gyl.zsj.chxz.CHXXFPGS_YZ_ACTION;
 import com.weaver.file.Prop;
-import com.weaver.formmodel.util.StringHelper;
 import com.weaver.general.Util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,13 +12,13 @@ import weaver.interfaces.workflow.action.Action;
 import weaver.soa.workflow.request.RequestInfo;
 
 /**
- * @className: CHXXFPGS_YZ_ACTION
+ * @className: KSFPGS_YZ_ACTION
  * @author: jun
- * @date: 2020-12-26 15:46
- * @Depiction:
+ * @date: 2020-12-29 15:24
+ * @Depiction: 客商公司分配信息 验证
  **/
-public class CHXXFPGS_YZ_ACTION implements Action {
-    private Log log = LogFactory.getLog(CHXXFPGS_YZ_ACTION.class.getName());
+public class KSFPGS_YZ_ACTION implements Action {
+    private Log log = LogFactory.getLog(KSFPGS_YZ_ACTION.class.getName());
     public String execute(RequestInfo requestInfo) {
         /**流程workflowid*/
         String workFlowId = requestInfo.getWorkflowid();
@@ -32,20 +32,19 @@ public class CHXXFPGS_YZ_ACTION implements Action {
         try{
             String returnMessage="";
             boolean returnFlag=false;
-            RecordSetDataSource rsnc = new RecordSetDataSource(Prop.getPropValue("GYL","ncds"));
             RecordSet recordSet = new RecordSet();
             String sql1="select * from " + tableName + "_dt1  where  mainid in (select id from "+tableName+" where requestid='"+requestId+"')";
             log.info("执行sql1---->"+sql1);
             recordSet.execute(sql1);
             while(recordSet.next()){
                 /**已分配公司*/
-                String yfpgsbh= Util.null2String(recordSet.getString("yfpgsbh"));
+                String yfpgsbm= Util.null2String(recordSet.getString("yfpgsbm"));
                 /**待分配公司*/
-                String dfpgsmc=Util.null2String(recordSet.getString("dfpgsmc"));
-                for(int i=0;i<yfpgsbh.split(",").length;i++){
-                    for(int j=0;j<dfpgsmc.split(",").length;j++){
-                        if(yfpgsbh.split(",")[i].equals(dfpgsmc.split(",")[j])){
-                            returnMessage="分配公司:"+dfpgsmc.split(",")[i]+"在已分配公司中存在,请乎重复选择,修改待分配公司信息后,重新提交!";
+                String fpgs=Util.null2String(recordSet.getString("fpgs"));
+                for(int i=0;i<yfpgsbm.split(",").length;i++){
+                    for(int j=0;j<fpgs.split(",").length;j++){
+                        if(yfpgsbm.split(",")[i].equals(fpgs.split(",")[j])){
+                            returnMessage="分配公司:"+fpgs.split(",")[i]+"在已分配公司中存在,请乎重复选择,修改待分配公司信息后,重新提交!";
                             returnFlag=true;
                             break;
                         }
@@ -58,14 +57,14 @@ public class CHXXFPGS_YZ_ACTION implements Action {
                     break;
                 }
             }
-            String sql2="select chbm,count(*) wlsl from " + tableName + "_dt1  where  mainid in (select id from "+tableName+" where requestid='"+requestId+"') group by chbm";
+            String sql2="select ksbm,count(*) count from " + tableName + "_dt1  where  mainid in (select id from "+tableName+" where requestid='"+requestId+"') group by ksbm";
             log.info("执行sql2---->"+sql2);
             recordSet.execute(sql2);
             while(recordSet.next()){
-                int wlsl= recordSet.getInt("wlsl");
-                String chbm=Util.null2String(recordSet.getString("chbm"));
-                if(wlsl>1){
-                    returnMessage="明细存货编码:"+chbm+"重复,请删除重复信息后，重新提交!";
+                int count= recordSet.getInt("count");
+                String ksbm=Util.null2String(recordSet.getString("ksbm"));
+                if(count>1){
+                    returnMessage="明细客商编码:"+ksbm+"重复,请删除重复信息后，重新提交!";
                     returnFlag=true;
                     break;
                 }

@@ -159,8 +159,8 @@ public class KHXZ_ACTION implements Action {
                     yhmid.setCUSTPROP("0");
                     /**时间戳*/
                     yhmid.setTS(dateFormate);
-                    /**所属公司 编码*/
-                    yhmid.setPK_CORP(Util.null2String(recordSet.getString("ssgs")));
+                    /**所属公司 编码 默认集团*/
+                    yhmid.setPK_CORP(Util.null2String(recordSet.getString("ssgs"))+",1");
                     /**删除标识*/
                     yhmid.setDR("0");
                     /**备注*/

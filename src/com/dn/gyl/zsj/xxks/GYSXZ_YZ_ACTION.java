@@ -39,7 +39,8 @@ public class GYSXZ_YZ_ACTION implements Action {
             while(recordSet.next()){
                 /**供应商名称*/
                 String gysmc= Util.null2String(recordSet.getString("gysmc"));
-                String sql2="select  count(*)  from bd_supplier  where pk_org = (select pk_group from org_group where code = '001') and name='"+gysmc+"'";
+                String sql2="select  count(*) count from bd_supplier  where pk_org = (select pk_group from org_group where code = '001') and name='"+gysmc+"'";
+                log.info("执行sql2---->"+sql2);
                 rsnc.execute(sql2);
                 rsnc.next();
                 int  count= rsnc.getInt("count");

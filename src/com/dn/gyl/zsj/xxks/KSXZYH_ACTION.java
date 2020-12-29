@@ -11,7 +11,9 @@ import weaver.interfaces.workflow.action.Action;
 import weaver.soa.workflow.request.RequestInfo;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -48,6 +50,7 @@ public class KSXZYH_ACTION implements Action {
             log.info("执行sql2:" + sql2 + "-->成功");
             NCMidCubasDocDataProcessor ncMidCubasDocDataProcessor=new NCMidCubasDocDataProcessor();
             String dateFormate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            List<MidCubasDocYhDetail> imList=new ArrayList<MidCubasDocYhDetail>();
             while(recordSet.next()){
                 MidCubasDocYhDetail yhmid=new MidCubasDocYhDetail();
                 String CUBASDOCYHID=UUID.randomUUID().toString().replaceAll("-", "");
@@ -64,11 +67,37 @@ public class KSXZYH_ACTION implements Action {
                 yhmid.setCREATETIME(dateFormate);
                 /**创建人*/
                 yhmid.setCREATOR(workCode);
-                RecordSetDataSource rsnc = new RecordSetDataSource(Prop.getPropValue("GYL","ncds"));
-
-
+                /**客户编码*/
+                yhmid.setCUSTCODE(Util.null2String(recordSet.getString("ksbm")));
+                /**客商名称*/
+                yhmid.setCUSTNAME(Util.null2String(recordSet.getString("ksmc")));
+                /**客商简称*/
+                yhmid.setCUSTSHORTNAME(Util.null2String(recordSet.getString("ksmc")));
+                /**客商类型*/
+                yhmid.setCUSTPROP(Util.null2String(recordSet.getString("kslx")));
+                /**时间戳*/
+                yhmid.setTS(dateFormate);
+                /**所属公司 编码*/
+                yhmid.setPK_CORP(gsmc);
+                /**删除标识*/
+                yhmid.setDR("0");
+                /**备注*/
+                yhmid.setVNOTE(lcbh+"_"+Util.null2String(recordSet.getString("id")));
+                /**联系人*/
+                yhmid.setVDEF1(Util.null2String(recordSet.getString("lxr")));
+                /**联系电话*/
+                yhmid.setVDEF2(Util.null2String(recordSet.getString("lxdh")));
+                /**银行类别*/
+                yhmid.setVDEF3(Util.null2String(recordSet.getString("yhlb")));
+                /**开户行*/
+                yhmid.setVDEF4(Util.null2String(recordSet.getString("khh")));
+                /**账号*/
+                yhmid.setVDEF5(Util.null2String(recordSet.getString("zh")));
+                /**供应链处理标识N*/
+                yhmid.setVDEF8("N");
+                imList.add(yhmid);
             }
-
+            ncMidCubasDocDataProcessor.midCubasDocYhNCData(imList);
         }catch(Exception e){
             requestInfo.getRequestManager().setMessagecontent("系统异常,请联系系统管理员!");
             log.info("触发流程:"+workFlowName+";执行接口类名:"+this.getClass().getName()+";发起请求RequestId:" + requestId + ";发起流程ID:" + workFlowId+";程序异常!");

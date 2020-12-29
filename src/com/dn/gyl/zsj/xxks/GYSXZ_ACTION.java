@@ -77,7 +77,7 @@ public class GYSXZ_ACTION implements Action {
                 /**客商类型 1 供应商*/
                 im.getHead().setCUSTPROP("1");
                 /**供应商分类 */
-                im.getHead().setPK_AREACL(Util.null2String(recordSet.getString("gyslx")));
+                im.getHead().setPK_AREACL(Util.null2String(recordSet.getString("gysfl")));
                 /**时间戳*/
                 im.getHead().setTS(dateFormate);
                 /**备注流程编号信息*/
@@ -119,7 +119,7 @@ public class GYSXZ_ACTION implements Action {
                     /**删除标识*/
                     mid.setDR("0");
                     /**供应商分类 */
-                    im.getHead().setPK_AREACL(Util.null2String(recordSet.getString("gyslx")));
+                    im.getHead().setPK_AREACL(Util.null2String(recordSet.getString("gysfl")));
                     /**时间戳*/
                     mid.setTS(dateFormate);
                     /**所属公司 编码*/
@@ -154,11 +154,11 @@ public class GYSXZ_ACTION implements Action {
                     /**客商简称*/
                     yhmid.setCUSTSHORTNAME(Util.null2String(recordSet.getString("gysmc")));
                     /**客商类型*/
-                    yhmid.setCUSTPROP("0");
+                    yhmid.setCUSTPROP("1");
                     /**时间戳*/
                     yhmid.setTS(dateFormate);
                     /**所属公司 编码*/
-                    yhmid.setPK_CORP(Util.null2String(recordSet.getString("ssgs")));
+                    yhmid.setPK_CORP(Util.null2String(recordSet.getString("ssgs"))+",1");
                     /**删除标识*/
                     yhmid.setDR("0");
                     /**备注*/

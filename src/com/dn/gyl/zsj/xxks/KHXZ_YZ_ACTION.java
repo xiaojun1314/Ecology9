@@ -41,6 +41,7 @@ public class KHXZ_YZ_ACTION implements Action {
                 /**客户名称*/
                 String khmc= Util.null2String(recordSet.getString("khmc"));
                 String sql2="select  count(*) count  from bd_customer  where pk_org = (select pk_group from org_group where code = '001') and name='"+khmc+"'";
+                log.info("执行sql2---->"+sql2);
                 rsnc.execute(sql2);
                 rsnc.next();
                 int  count= rsnc.getInt("count");
